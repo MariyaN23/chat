@@ -110,11 +110,15 @@ export const Chat = () => {
                     })}
                 </div>
 
-                <div className={styles.inputContainer}>
-                    <div>
+                <div className={styles.inputAndTextareaContainer}>
+                    <div className={styles.inputWrapper}>
                         {nameError && <span className={styles.error}>{nameError}</span>}
-                        <input value={name} onChange={(e) => setName(e.currentTarget.value)}/>
-                        <button onClick={sendNameHandler}>Name in chat</button>
+                        <input value={name}
+                               onChange={(e) => setName(e.currentTarget.value)}
+                               maxLength={20}
+                               placeholder={'Your name in chat'}
+                        />
+                        <button onClick={sendNameHandler}>Submit</button>
                     </div>
 
                     <div className={styles.textareaWrapper}>
@@ -123,6 +127,7 @@ export const Chat = () => {
                                   onChange={setMessageHandler}
                                   onKeyUp={typeMessageHandler}
                                   maxLength={20}
+                                  placeholder={'Type something...'}
                         >
                         </textarea>
                         <button onClick={sendMessageHandler}>Send</button>
