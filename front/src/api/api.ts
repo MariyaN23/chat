@@ -4,7 +4,8 @@ import {AllMessagesType, MessageType, UserType} from "../store/types";
 export const api = {
     socket: null as null | Socket,
     setConnection() {
-        this.socket = io('http://localhost:3009/')
+        //this.socket = io('http://localhost:3009')
+        this.socket = io('https://capybara-chat.onrender.com/')
     },
     subscribe(initMessagesPublished: (messages: AllMessagesType, fn: ()=> void) => void,
               newMessageSent: (message: MessageType) => void,

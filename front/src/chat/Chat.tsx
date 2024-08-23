@@ -4,6 +4,8 @@ import {selectMessages, selectTypingUsers} from "../store/chat-selectors";
 import {useActions} from "../store/redux-utils";
 import {chatActions} from "../store";
 import {MessageType, UserType} from "../store/types";
+import styles from '../chat/Chat.module.scss'
+import logo from '../assets/images/capybara-logo.jpg'
 
 export const Chat = () => {
     console.log('render app')
@@ -21,11 +23,15 @@ export const Chat = () => {
     const [message, setMessage] = useState<string>('')
     const [error, setError] = useState<string | null>(null)
     const sendMessageHandler = () => {
-        if (message.trim().length && message.length < 20) {
+        const newMessage = message.trim()
+        if (newMessage.length === 0) {
+            setError(`Message is empty`)
+        }
+        if (newMessage.length >= 20) {
+            setError(`Message is too long`)
+        } else if (newMessage.length && message.length < 20) {
             setNewMessage(message)
             setMessage('')
-        } else {
-            setError('Message is too long')
         }
     }
 
@@ -35,10 +41,17 @@ export const Chat = () => {
     }
 
     const [name, setName] = useState<string>('')
-
+    const [nameError, setNameError] = useState<string>('')
     const sendNameHandler = () => {
-        if (name.trim().length) {
+        const newName = name.trim()
+        if (newName.length === 0) {
+            setNameError(`Name shouldn't be empty`)
+        }
+        if (newName.length >= 20) {
+            setNameError(`Name is too long`)
+        } else if (newName.length && newName.length < 20) {
             setClientName(name)
+            setNameError('')
         }
     }
 
@@ -55,54 +68,67 @@ export const Chat = () => {
         messageIsTyping()
     }
 
+    const setScrollHandler = (e: React.UIEvent<HTMLElement>) => {
+        const element = e.currentTarget
+        const maxScrollPosition = element.scrollHeight - element.clientHeight
+        const scrollCondition = Math.abs(maxScrollPosition - element.scrollTop) < 10
+        if (element.scrollTop > lastScrollTop && scrollCondition) {
+            setIsAutoScrollActive(true)
+        } else {
+            setIsAutoScrollActive(false)
+        }
+        setLastScrollTop(element.scrollTop)
+    }
+
     return (
-        <div>
-            <div style={{
-                border: '1px solid black',
-                padding: '10px',
-                height: '300px',
-                width: '300px',
-                overflowY: 'scroll'
-            }} onScroll={(e) => {
-                const element = e.currentTarget
-                const maxScrollPosition = element.scrollHeight - element.clientHeight
-                const scrollCondition = Math.abs(maxScrollPosition - element.scrollTop) < 10
-                if (element.scrollTop > lastScrollTop && scrollCondition) {
-                    setIsAutoScrollActive(true)
-                } else {
-                    setIsAutoScrollActive(false)
-                }
-                setLastScrollTop(element.scrollTop)
-            }}>
-                {allMessages.map((m: MessageType) => {
-                    return <div key={m.messageId}>
-                        <b>{m.user.name}:</b> {m.message}
-                        <hr/>
+        <div className={styles.chatContainer}>
+            <div className={styles.chatHeader}>
+                <img src={logo} alt={'chat-logo'}/>
+                <div>Capybara chat</div>
+            </div>
+
+            <div className={styles.messagesContainer}>
+                <div className={styles.messages}>
+                    <div onScroll={setScrollHandler}>
+                        {allMessages.map((m: MessageType) => {
+                            return <div key={m.messageId}>
+                                <div className={styles.messageWrapper}>
+                                    <b>{m.user.name}</b>
+                                    <div className={styles.message}>{m.message}</div>
+                                </div>
+                            </div>
+                        })}
+                        <div ref={messagesAnchorRef}></div>
                     </div>
-                })}
-                <div ref={messagesAnchorRef}></div>
-            </div>
+                </div>
 
-            <div>
-                {allTypingUsers.map((u: UserType) => {
-                    return <div key={u.userId}>
-                        <p>{u.name} is typing...</p>
+                <div>
+                    {allTypingUsers.map((u: UserType) => {
+                        return <div key={u.userId}>
+                            <p>{u.name} is typing...</p>
+                        </div>
+                    })}
+                </div>
+
+                <div className={styles.inputContainer}>
+                    <div>
+                        {nameError && <span className={styles.error}>{nameError}</span>}
+                        <input value={name} onChange={(e) => setName(e.currentTarget.value)}/>
+                        <button onClick={sendNameHandler}>Name in chat</button>
                     </div>
-                })}
-            </div>
 
-            <div>
-                <input value={name} onChange={(e) => setName(e.currentTarget.value)}/>
-                <button onClick={sendNameHandler}>Name in chat</button>
-            </div>
+                    <div className={styles.textareaWrapper}>
+                        {error && <span className={styles.error}>{error}</span>}
+                        <textarea value={message}
+                                  onChange={setMessageHandler}
+                                  onKeyUp={typeMessageHandler}
+                                  maxLength={20}
+                        >
+                        </textarea>
+                        <button onClick={sendMessageHandler}>Send</button>
+                    </div>
+                </div>
 
-            <div>
-                <textarea value={message}
-                          onChange={setMessageHandler}
-                          onKeyUp={typeMessageHandler}>
-                </textarea>
-                <button onClick={sendMessageHandler}>Send</button>
-                {error && <div>{error}</div>}
             </div>
         </div>
     )
