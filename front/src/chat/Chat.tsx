@@ -42,6 +42,7 @@ export const Chat = () => {
 
     const [name, setName] = useState<string>('')
     const [nameError, setNameError] = useState<string>('')
+    const [disabled, setDisabled] = useState<boolean>(false)
     const sendNameHandler = () => {
         const newName = name.trim()
         if (newName.length === 0) {
@@ -52,6 +53,7 @@ export const Chat = () => {
         } else if (newName.length && newName.length < 20) {
             setClientName(name)
             setNameError('')
+            setDisabled(true)
         }
     }
 
@@ -117,8 +119,12 @@ export const Chat = () => {
                                onChange={(e) => setName(e.currentTarget.value)}
                                maxLength={20}
                                placeholder={'Your name in chat'}
+                               disabled={disabled}
                         />
-                        <button onClick={sendNameHandler}>Submit</button>
+                        <button onClick={sendNameHandler}
+                                disabled={disabled}
+                        >Submit
+                        </button>
                     </div>
 
                     <div className={styles.textareaWrapper}>
